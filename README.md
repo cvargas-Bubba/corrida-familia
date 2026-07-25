@@ -1,35 +1,39 @@
 # Corrida Familia · Aventura en Río 🏃🇧🇷
 
-Juego de plataformas estilo Mario, protagonizado por la familia: **Cristóbal**,
-**Fernanda** y **Javiera** (personajes cabezones). Corre y salta por Río de
-Janeiro, junta monedas 🪙 y estrellas ⭐, vence cangrejos saltándoles encima,
-esquiva pozos y pinchos, derrota al jefe 👑 y llega a la meta 🏁.
+Juego de plataformas estilo Mario protagonizado por la familia — **Cristóbal**,
+**Fernanda** y **Javiera** (cabezones con sus caricaturas). Corre y salta por Río,
+junta 🪙 y ⭐, vence cangrejos saltándoles encima, derrota al jefe 👑 y llega a la 🏁.
+
+Construido con **[Phaser 3](https://phaser.io)** (motor de juegos). La librería va
+incluida localmente (`phaser.min.js`), así que **funciona offline y sin CDN**.
 
 ## Jugar
-
-Abre `index.html` en cualquier navegador (o publícalo con GitHub Pages).
-Es un único archivo HTML autocontenido — sin dependencias ni build.
+Serví la carpeta (GitHub Pages) o abrí `index.html` en un navegador.
+Necesita `phaser.min.js` al lado del `index.html`.
 
 ### Controles
 - **← →** (o **A / D**): mover
-- **Espacio / ↑ / W**: saltar (mantén presionado para saltar más alto)
-- **M**: silenciar
-- En móvil: botones táctiles en pantalla (◀ ▶ y saltar)
+- **Espacio / ↑ / W**: saltar (mantén = salto más alto)
+- **M** no aplica aquí; usá el botón **🔊 Sonido**
+- Móvil: botones táctiles ◀ ▶ y saltar
 
-## Fotos de los personajes
-Cada héroe puede llevar una **foto real** como cabeza: se sube y recorta dentro
-del propio juego. La foto **nunca sale de tu dispositivo** — se guarda solo en el
-`localStorage` del navegador y **no se sube al repositorio**.
+## Modos y detalles
+- **Modo familia** 👨‍👧‍👧: los 3 corren juntos (elegís el líder; los otros lo siguen).
+- **Mueca de festejo** 🎉: al superar el nivel o vencer al jefe, el héroe rebota,
+  gira y suelta confeti con un "¡BIEEN!".
+- **Caricaturas integradas**: las 3 caras van embebidas en `index.html` (data URI),
+  iguales en todos los dispositivos. Las fotos/caras no dependen del navegador.
 
 ## Estructura
-- `index.html` — el juego completo (HTML + Canvas + JavaScript, motor propio).
+- `index.html` — juego completo (Phaser + escenas + niveles + caricaturas embebidas)
+- `phaser.min.js` — motor Phaser 3 (local, ~1.2 MB)
 
 ## Roadmap
-- [ ] Más niveles y mundos (playa noche, ciudad, selva)
+- [ ] Más niveles y mundos
 - [ ] Power-ups (escudo, imán de estrellas, salto doble)
-- [ ] Migrar a un motor (Phaser 3) con spritesheets y tilemaps
-- [ ] Ranking online entre la familia
-- [ ] Empaquetar como PWA instalable
+- [ ] Spritesheets animados de correr/saltar
+- [ ] Ranking online entre la familia (Supabase)
+- [ ] PWA instalable
 
 ---
 Hecho en familia. ⚽
