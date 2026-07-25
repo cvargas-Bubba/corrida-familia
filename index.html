@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0e2033"><title>Corrida Familia · Aventura en Río</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0e2033"><title>VargasX3 · Río · Carretera Austral · Básquet</title></head>
 <body>
 <div id="wrap">
   <div id="hud-top">
-    <h1 class="wordmark">Corrida Familia<span>Aventura en Río · Phaser</span></h1>
+    <h1 class="wordmark">VargasX3<span>Río · Carretera Austral · Básquet</span></h1>
   </div>
 
   <div class="screen" id="screen">
@@ -132,11 +132,26 @@
     { w:52, spawn:[2,9], flag:[49,9], pits:[[17,18],[33,34]],
       rows:["","","","             =====                   =====","","        ===                        ===","                    BBBB","","","                          ^^^"],
       coins:[[13,2],[14,2],[15,2],[17,7],[18,7],[36,4],[37,4],[38,4],[9,4],[10,4],[45,8],[46,8]],
-      stars:[[15,1],[47,3]], enemies:[[11,9,"crab"],[26,9,"crab"],[42,9,"crab"]] },
+      stars:[[15,1],[47,3]], enemies:[[11,9,"crab"],[26,9,"crab"],[42,9,"crab"]],
+      theme:{ name:"Río de Janeiro", sky:[0x3f9fd8,0xcfeefb], sun:true, clouds:3,
+        layers:[[0x5aa9c0,300,120,0.15],[0x3f8ea3,340,150,0.3]],
+        ground:{top:0xe8cd83,fill:0xd8b25f,edge:0xb98e3d}, brick:0xc76b3a, oneway:0x9a6a3a,
+        enemy:0xe05a3a, boss:0xc0392b, collectible:"coin", goal:"flag", win:"¡BIEEN! 🎉" } },
     { w:60, spawn:[2,9], flag:[57,9], pits:[[15,16],[27,29],[44,45]],
       rows:["","","          ===        ====","                              BBB","     ===                                 ===","                  BBBB          ====","","                         ^^^        ^^","",""],
       coins:[[11,1],[12,1],[21,3],[22,3],[31,2],[32,2],[38,4],[39,4],[6,3],[50,3],[51,3],[52,3]],
-      stars:[[22,2],[46,4]], enemies:[[10,9,"crab"],[24,9,"crab"],[36,9,"crab"],[50,9,"boss"]] }
+      stars:[[22,2],[46,4]], enemies:[[10,9,"crab"],[24,9,"crab"],[36,9,"crab"],[50,9,"boss"]],
+      theme:{ name:"Carretera Austral", sky:[0x93b0bf,0xdfeaef], sun:false, clouds:6, snow:true, pines:true,
+        layers:[[0x5a7d66,300,150,0.12],[0x3f5c4c,345,175,0.28]],
+        ground:{top:0x8f9e7c,fill:0x6f6152,edge:0x53483d}, brick:0x7a6a55, oneway:0x6b563d,
+        enemy:0xb5651d, boss:0x8a4b12, collectible:"coin", goal:"flag", win:"¡BIEEN! 🎉" } },
+    { w:54, spawn:[2,9], flag:[51,9], pits:[[24,25]],
+      rows:["","","","        ===            ===         ===","","             BBB              BBB","","","",""],
+      coins:[[9,2],[10,2],[15,4],[16,4],[30,2],[31,2],[38,3],[39,3],[46,7],[47,7]],
+      stars:[[16,3],[39,2]], enemies:[[13,9,"crab"],[33,9,"crab"],[46,9,"crab"]],
+      theme:{ name:"Cancha VargasX3", sky:[0x2b3450,0x515d82], sun:false, clouds:0, court:true,
+        layers:[], ground:{top:0xdca24f,fill:0xc07e33,edge:0x8f5c22}, brick:0x8a5a2a, oneway:0xb07a3a,
+        enemy:0xff7a1a, boss:0xd94f00, collectible:"ball", goal:"hoop", win:"¡ENCESTÓ! 🏀" } }
   ];
 
   // ---------- shared run state ----------
@@ -219,6 +234,7 @@
     buildTextures(){
       if(!this.textures.exists("coin")){ const g=this.make.graphics({x:0,y:0,add:false}); g.fillStyle(0xf2b90f,1);g.fillEllipse(11,13,18,22); g.fillStyle(0xffe07a,1);g.fillEllipse(11,13,9,15); g.generateTexture("coin",22,26); g.destroy(); }
       if(!this.textures.exists("confetti")){ const g=this.make.graphics({x:0,y:0,add:false}); g.fillStyle(0xffffff,1);g.fillRect(0,0,6,6); g.generateTexture("confetti",6,6); g.destroy(); }
+      if(!this.textures.exists("ball")){ const g=this.make.graphics({x:0,y:0,add:false}); g.fillStyle(0xff7a1a,1);g.fillCircle(12,12,11); g.lineStyle(2,0x7a2e00,1); g.strokeCircle(12,12,11); g.lineBetween(1,12,23,12); g.lineBetween(12,1,12,23); g.beginPath();g.arc(4,12,13,-1,1);g.strokePath(); g.beginPath();g.arc(20,12,13,Math.PI-1,Math.PI+1);g.strokePath(); g.generateTexture("ball",24,24); g.destroy(); }
       // circular head textures
       CHARS.forEach(c=>{
         const key="head_"+c.id;
@@ -237,14 +253,17 @@
     }
 
     buildBackground(){
-      const cam=this.cameras.main;
-      const sky=this.add.graphics().setScrollFactor(0); sky.fillGradientStyle(0x3f9fd8,0x3f9fd8,0xcfeefb,0xcfeefb,1); sky.fillRect(0,0,GW,GH);
-      // sun
-      const sun=this.add.circle(640,80,32,0xfff3c4).setScrollFactor(0.1); this.add.circle(640,80,90,0xfff0b4,0.18).setScrollFactor(0.1);
-      // hills (two parallax layers via graphics drawn wide)
-      const mkHills=(color,baseY,amp,sf)=>{ const g=this.add.graphics().setScrollFactor(sf); g.fillStyle(color,1); g.beginPath(); g.moveTo(0,GH);
-        for(let x=0;x<=GW*1.6;x+=16){ const y=baseY-(Math.sin(x*0.006)*0.5+0.5)*amp; g.lineTo(x,y);} g.lineTo(GW*1.6,GH);g.closePath();g.fillPath(); };
-      mkHills(0x5aa9c0,300,120,0.15); mkHills(0x3f8ea3,340,150,0.3);
+      const th=this.lv.theme;
+      const sky=this.add.graphics().setScrollFactor(0); sky.fillGradientStyle(th.sky[0],th.sky[0],th.sky[1],th.sky[1],1); sky.fillRect(0,0,GW,GH);
+      if(th.sun){ this.add.circle(640,80,90,0xfff0b4,0.18).setScrollFactor(0.1); this.add.circle(640,80,32,0xfff3c4).setScrollFactor(0.1); }
+      for(let i=0;i<(th.clouds||0);i++){ const cx=(i*180+60)%GW, cy=24+((i*53)%80), s=0.7+((i*29)%40)/50; const g=this.add.graphics().setScrollFactor(0.12); g.fillStyle(0xffffff,0.9); g.fillEllipse(cx,cy,64*s,20*s); g.fillEllipse(cx+24*s,cy-9*s,44*s,20*s); }
+      (th.layers||[]).forEach(([color,baseY,amp,sf],idx)=>{ const g=this.add.graphics().setScrollFactor(sf); const yAt=x=>baseY-(Math.sin(x*0.006+idx*1.3)*0.5+0.5)*amp;
+        g.fillStyle(color,1); g.beginPath(); g.moveTo(0,GH); for(let x=0;x<=GW*1.7;x+=16) g.lineTo(x,yAt(x)); g.lineTo(GW*1.7,GH);g.closePath();g.fillPath();
+        if(th.snow && idx===th.layers.length-1){ g.fillStyle(0xeef4f7,1); for(let x=0;x<=GW*1.7;x+=26){ const y=yAt(x); g.fillTriangle(x-11,y+17,x+11,y+17,x,y);} }
+      });
+      if(th.pines){ const g=this.add.graphics().setScrollFactor(0.34); for(let i=0;i<16;i++){ const x=30+i*80+((i*37)%40), by=362; g.fillStyle(0x24401f,1); g.fillTriangle(x-12,by,x+12,by,x,by-38); g.fillTriangle(x-14,by-16,x+14,by-16,x,by-50); g.fillStyle(0x5a3a22,1); g.fillRect(x-3,by,6,12);} }
+      if(th.court){ const g=this.add.graphics().setScrollFactor(0.25); for(let r=0;r<5;r++){ g.fillStyle(r%2?0x39456a:0x2f3a5a,1); g.fillRect(0,150+r*24,GW*1.7,24);}
+        const pal=[0xffce2e,0x1f9e57,0x2a49c9,0xe05a3a,0xffffff]; for(let i=0;i<130;i++){ const x=(i*57)%(GW*1.7), y=158+((i*31)%110); g.fillStyle(pal[i%5],1); g.fillCircle(x,y,3);} }
     }
 
     buildLevel(){
@@ -252,28 +271,38 @@
       this.grid=[]; for(let r=0;r<ROWS;r++){ let src=r<10?(lv.rows[r]||""):groundRow(w,lv.pits); const row=[]; for(let c=0;c<w;c++)row.push(src[c]||" "); this.grid.push(row); }
       this.solids=this.physics.add.staticGroup();
       this.oneways=this.physics.add.staticGroup();
-      const terr=this.add.graphics();
+      const th=lv.theme, terr=this.add.graphics();
       for(let ty=0;ty<ROWS;ty++)for(let tx=0;tx<w;tx++){
         const ch=this.grid[ty][tx]; if(ch===" ")continue; const x=tx*T,y=ty*T;
         if(ch==="#"||ch==="B"){
           const body=this.add.rectangle(x+T/2,y+T/2,T,T); this.physics.add.existing(body,true); this.solids.add(body); body.setVisible(false);
-          if(ch==="#"){ terr.fillStyle(0xd8b25f,1);terr.fillRect(x,y,T,T); terr.fillStyle(0xe8cd83,1);terr.fillRect(x,y,T,6); terr.fillStyle(0xb98e3d,1);terr.fillRect(x,y+T-5,T,5); }
-          else { terr.fillStyle(0xc76b3a,1);terr.fillRect(x,y,T,T); terr.fillStyle(0xe08a54,1);terr.fillRect(x+1,y+1,T-2,6); terr.lineStyle(2,0x8f4a24,1);terr.strokeRect(x+2,y+2,T-4,T-4); }
+          if(ch==="#"){ terr.fillStyle(th.ground.fill,1);terr.fillRect(x,y,T,T); terr.fillStyle(th.ground.top,1);terr.fillRect(x,y,T,6); terr.fillStyle(th.ground.edge,1);terr.fillRect(x,y+T-5,T,5); }
+          else { terr.fillStyle(th.brick,1);terr.fillRect(x,y,T,T); terr.fillStyle(0xffffff,0.16);terr.fillRect(x+1,y+1,T-2,6); terr.lineStyle(2,0x000000,0.18);terr.strokeRect(x+2,y+2,T-4,T-4); }
         } else if(ch==="="){
           const body=this.add.rectangle(x+T/2,y+5,T,10); this.physics.add.existing(body,true); body.body.checkCollision.down=false; body.body.checkCollision.left=false; body.body.checkCollision.right=false; this.oneways.add(body); body.setVisible(false);
-          terr.fillStyle(0x9a6a3a,1);terr.fillRect(x,y,T,10); terr.fillStyle(0xb98c55,1);terr.fillRect(x,y,T,3);
+          terr.fillStyle(th.oneway,1);terr.fillRect(x,y,T,10); terr.fillStyle(0xffffff,0.22);terr.fillRect(x,y,T,3);
         } else if(ch==="^"){
           terr.fillStyle(0xb8c0c8,1); for(let k=0;k<4;k++){ terr.beginPath();terr.moveTo(x+k*10,y+T);terr.lineTo(x+k*10+5,y+T-16);terr.lineTo(x+k*10+10,y+T);terr.closePath();terr.fillPath();}
         }
       }
-      // flag
-      const fx=lv.flag[0]*T, fy=lv.flag[1]*T;
-      const fg=this.add.graphics(); fg.fillStyle(0xe8e4dc,1);fg.fillRect(fx+18,fy-T*2,4,T*3); fg.fillStyle(0x1f9e57,1);fg.fillTriangle(fx+22,fy-T*2,fx+48,fy-T*2+10,fx+22,fy-T*2+20);
-      this.flagZone=this.add.zone(fx+20,fy-T,30,T*2); this.physics.add.existing(this.flagZone,true);
+      // court markings (básquet)
+      if(th.court){ terr.fillStyle(0xffffff,0.85); terr.fillRect(0,10*T+3,w*T,3); for(let m=60;m<w*T;m+=200) terr.fillRect(m,10*T+3,3,24); terr.lineStyle(3,0xffffff,0.7); terr.strokeCircle(6*T,10*T+3,46); }
+      // meta: bandera o aro
+      const fx=lv.flag[0]*T, fy=lv.flag[1]*T; const fg=this.add.graphics();
+      if(th.goal==="hoop"){
+        fg.fillStyle(0x444a55,1); fg.fillRect(fx+30,fy-T*3,6,T*3);                         // poste
+        fg.fillStyle(0xf2f2f2,1); fg.fillRect(fx-4,fy-T*3-6,40,34); fg.lineStyle(2,0xd94f00,1); fg.strokeRect(fx+8,fy-T*3+8,16,12); // tablero
+        fg.fillStyle(0xff5a1f,1); fg.fillRect(fx+2,fy-T*3+20,26,4);                          // aro
+        fg.lineStyle(2,0xffffff,0.9); for(let n=0;n<6;n++) fg.lineBetween(fx+3+n*4.6,fy-T*3+24,fx+8+n*3.4,fy-T*3+42); // red
+      } else {
+        fg.fillStyle(0xe8e4dc,1);fg.fillRect(fx+18,fy-T*2,4,T*3); fg.fillStyle(0x1f9e57,1);fg.fillTriangle(fx+22,fy-T*2,fx+48,fy-T*2+10,fx+22,fy-T*2+20);
+      }
+      this.flagZone=this.add.zone(fx+20,fy-T,34,T*2); this.physics.add.existing(this.flagZone,true);
 
-      // coins & stars
+      // coleccionables (monedas o pelotas) + estrellas
+      const ckey=th.collectible==="ball"?"ball":"coin";
       this.coinGroup=this.physics.add.staticGroup(); this.starGroup=this.physics.add.staticGroup();
-      lv.coins.forEach(([cx,cy])=>this.coinGroup.create(cx*T+T/2,cy*T+T/2,"coin"));
+      lv.coins.forEach(([cx,cy])=>this.coinGroup.create(cx*T+T/2,cy*T+T/2,ckey));
       lv.stars.forEach(([cx,cy])=>this.starGroup.create(cx*T+T/2,cy*T+T/2,"star"));
 
       // spikes as overlap zones
@@ -286,7 +315,7 @@
     }
 
     makeCrab(x,y,boss){
-      const w=boss?46:30,h=boss?40:28, color=boss?0xc0392b:0xe05a3a;
+      const th=this.lv.theme, w=boss?46:30,h=boss?40:28, color=boss?th.boss:th.enemy;
       const cont=this.add.container(x,y);
       const body=this.add.ellipse(0,0,w,h*0.9,color);
       const eyeL=this.add.circle(-w*0.18,-2,3,0xffffff), eyeR=this.add.circle(w*0.18,-2,3,0xffffff);
@@ -365,10 +394,10 @@
       this.hud=this.add.text(12,10,"",{fontFamily:"Trebuchet MS, monospace",fontSize:"18px",color:"#0d2536",fontStyle:"bold"}).setScrollFactor(0).setDepth(50);
       this.hud2=this.add.text(11,9,"",{fontFamily:"Trebuchet MS, monospace",fontSize:"18px",color:"#fff6d8",fontStyle:"bold"}).setScrollFactor(0).setDepth(51);
       this.refreshHUD();
-      this.banner=this.add.text(GW/2,GH/2-40,"Nivel "+(S.level+1),{fontFamily:"Arial Black",fontSize:"40px",color:"#ffce2e",stroke:"#0c3b5c",strokeThickness:6}).setOrigin(0.5).setScrollFactor(0).setDepth(60);
-      this.tweens.add({targets:this.banner,alpha:0,delay:800,duration:600,onComplete:()=>this.banner.destroy()});
+      this.banner=this.add.text(GW/2,GH/2-40,"Nivel "+(S.level+1)+"  ·  "+this.lv.theme.name,{fontFamily:"Arial Black",fontSize:"30px",color:"#ffce2e",stroke:"#0c3b5c",strokeThickness:6,align:"center"}).setOrigin(0.5).setScrollFactor(0).setDepth(60);
+      this.tweens.add({targets:this.banner,alpha:0,delay:1100,duration:700,onComplete:()=>this.banner.destroy()});
     }
-    refreshHUD(){ const S=RUN_STATE; const txt=`❤ ${S.lives}    🪙 ${S.coins}   ⭐ ${S.stars}    NIVEL ${S.level+1}   ${S.score} pts`; this.hud.setText(txt); this.hud2.setText(txt); }
+    refreshHUD(){ const S=RUN_STATE; const ci=this.lv.theme.collectible==="ball"?"🏀":"🪙"; const txt=`❤ ${S.lives}    ${ci} ${S.coins}   ⭐ ${S.stars}    NIVEL ${S.level+1}   ${S.score} pts`; this.hud.setText(txt); this.hud2.setText(txt); }
 
     setupInput(){
       this.keys=this.input.keyboard.addKeys({left:Phaser.Input.Keyboard.KeyCodes.LEFT,right:Phaser.Input.Keyboard.KeyCodes.RIGHT,a:Phaser.Input.Keyboard.KeyCodes.A,d:Phaser.Input.Keyboard.KeyCodes.D,up:Phaser.Input.Keyboard.KeyCodes.UP,w:Phaser.Input.Keyboard.KeyCodes.W,space:Phaser.Input.Keyboard.KeyCodes.SPACE});
@@ -407,7 +436,7 @@
       // mueca de festejo: rebote + giro de cabeza + confeti + estrellas + burbuja
       this.tweens.add({targets:this.player,scaleX:1.25,scaleY:1.25,yoyo:true,repeat:5,duration:170});
       if(this.player.headRef) this.tweens.add({targets:this.player.headRef,angle:360,duration:700,repeat:1});
-      const bubble=this.add.text(this.player.x,this.player.y-52,"¡BIEEN! 🎉",{fontFamily:"Arial Black",fontSize:"20px",color:"#fff",stroke:"#1f9e57",strokeThickness:5}).setOrigin(0.5).setDepth(70);
+      const bubble=this.add.text(this.player.x,this.player.y-52,this.lv.theme.win,{fontFamily:"Arial Black",fontSize:"20px",color:"#fff",stroke:"#1f9e57",strokeThickness:5}).setOrigin(0.5).setDepth(70);
       this.tweens.add({targets:bubble,y:bubble.y-16,alpha:0,delay:900,duration:700});
       const conf=this.add.particles(this.player.x,this.player.y-30,"confetti",{lifespan:900,speed:{min:80,max:220},angle:{min:200,max:340},gravityY:300,scale:{start:1.4,end:0},quantity:3,frequency:30,tint:[0xffce2e,0x1f9e57,0x2a49c9,0xffffff]});
       // sparkle stars orbiting
