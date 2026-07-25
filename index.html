@@ -124,7 +124,7 @@
   CHARS.forEach(c=>{ const n=localStorage.getItem(NAMEK(c.id)); if(n)c.name=n; });
 
   const T=40, ROWS=12, GW=800, GH=480;
-  const GRAV=1500, RUN=220, JUMPV=-580, MAXFALL=780;
+  const GRAV=1500, RUN=220, JUMPV=-640, MAXFALL=780;
 
   // ---------- level data (tiles: # B solid, = one-way, ^ spike) ----------
   function groundRow(w,pits){ const a=Array(w).fill("#"); pits.forEach(([s,e])=>{for(let i=s;i<=e;i++)a[i]=" ";}); return a.join(""); }
@@ -477,8 +477,9 @@
       inputState.jumpEdge=false;
       if(jumpPressed && grounded){ b.setVelocityY(JUMPV); sfx.jump(); }
       this.jumpHeld=jumpDown;
-      // variable jump
-      if(!jumpDown && b.velocity.y<0) b.setVelocityY(b.velocity.y*0.5>-120?b.velocity.y:b.velocity.y+30);
+      // salto variable apto para móvil: el toque ya salta alto (llega a las plataformas);
+      // MANTENER presionado baja la gravedad al subir para llegar aún más alto.
+      if(jumpDown && b.velocity.y<0) b.setGravityY(-GRAV*0.34); else b.setGravityY(0);
       if(b.velocity.y>MAXFALL) b.setVelocityY(MAXFALL);
 
       // run animation
