@@ -273,7 +273,7 @@
     constructor(){ super("PlayScene"); }
     create(){
       const S=RUN_STATE; this.lv=LEVELS[S.level]; this.celebrating=false; this.dead=false; this.runPhase=0;
-      this.magnetUntil=0; this.djumpUntil=0; this.jumpsUsed=0;
+      this.magnetUntil=0; this.djumpUntil=0; this.jumpsUsed=0; this.miniGame=false; this._shoot=false;
       const mk=this.lv.theme.court?"court":(this.lv.theme.snow?"austral":"rio"); startMusic(mk);
       this.buildTextures();
       this.buildBackground();
@@ -500,7 +500,10 @@
       if(RUN_STATE.lives<=0){ this.dead=true; this.time.delayedCall(400,()=>this.gameOver()); }
     }
 
-    reachFlag(){ if(this.celebrating||this.dead)return; sfx.gol(); this.celebrate(true); }
+    reachFlag(){ if(this.celebrating||this.dead||this.miniGame)return;
+      if(this.lv.theme.goal==="hoop"){ this.startHoopGame(); }
+      else { sfx.gol(); this.celebrate(true); }
+    }
 
     celebrate(levelEnd){
       if(this.celebrating)return; this.celebrating=true;
@@ -536,7 +539,85 @@
       showOverlay(overlays.over);
     }
 
+    // ---------- mini-juego de encestar (nivel básquet) ----------
+    startHoopGame(){
+      this.miniGame=true; this.shotsLeft=5; this.made=0; this.shot=null; this._shoot=false; this.powerT=0; this.powerDir=1;
+      stopMusic(); startMusic("court");
+      [this.enemyGroup,this.coinGroup,this.starGroup,this.powerGroup].forEach(g=>g&&g.setVisible(false));
+      [this.hud,this.hud2,this.powerHud].forEach(o=>o&&o.setVisible(false));
+      if(this.shieldRing)this.shieldRing.setVisible(false);
+      (this.followers||[]).forEach(f=>f.setVisible(false));
+      const fx=this.lv.flag[0]*T, fy=this.lv.flag[1]*T;
+      this.rim={ x:fx+15, y:fy-T*3+22 };
+      const heroX=fx-230, groundY=fy-6;
+      this.player.body.setVelocity(0,0); this.player.body.allowGravity=false;
+      this.player.setPosition(heroX,groundY); this.player.scaleX=1; this.poseHero(this.player,0,"idle");
+      this.cameras.main.stopFollow(); this.cameras.main.centerOn((heroX+this.rim.x)/2, fy-120);
+      this.hand={ x:heroX+16, y:groundY-34 };
+      this.ball=this.add.image(this.hand.x,this.hand.y,"ball").setDepth(8);
+      const bBot=GH-70, bTop=GH-240, bx=52; this.meter={bx,bBot,bTop};
+      this.mUI=this.add.container(0,0).setScrollFactor(0).setDepth(80);
+      const track=this.add.rectangle(bx,(bBot+bTop)/2,18,bBot-bTop,0x0d2536,0.6).setStrokeStyle(2,0xffffff,0.5);
+      const sweetTop=bBot-(0.82+0.14)*(bBot-bTop), sweetH=0.28*(bBot-bTop);
+      const sweet=this.add.rectangle(bx,sweetTop+sweetH/2,18,sweetH,0x1f9e57,0.75);
+      this.marker=this.add.rectangle(bx,bBot,30,5,0xffce2e);
+      const lbl=this.add.text(bx,bBot+14,"POTENCIA",{fontFamily:"Arial Black",fontSize:"10px",color:"#eaffff"}).setOrigin(0.5,0);
+      this.mUI.add([track,sweet,this.marker,lbl]);
+      this.hoopHud=this.add.text(GW/2,18,"",{fontFamily:"Arial Black",fontSize:"19px",color:"#ffce2e",stroke:"#0c3b5c",strokeThickness:5}).setOrigin(0.5,0).setScrollFactor(0).setDepth(80);
+      this.hoopMsg=this.add.text(GW/2,GH-42,"Toca / Espacio para lanzar 🏀",{fontFamily:"Arial Black",fontSize:"15px",color:"#fff",stroke:"#0c3b5c",strokeThickness:4}).setOrigin(0.5).setScrollFactor(0).setDepth(80);
+      this.refreshHoopHud();
+      this._shootHandler=()=>{ this._shoot=true; }; this.input.on("pointerdown",this._shootHandler);
+      touchEl.classList.add("show");
+    }
+    refreshHoopHud(){ if(this.hoopHud)this.hoopHud.setText(`🏀 Encestados: ${this.made}   ·   Tiros restantes: ${this.shotsLeft}`); }
+    updateHoop(time,delta){
+      if(this.shot){
+        this.shot.t += delta/this.shot.dur; const t=Math.min(1,this.shot.t), u=1-t, s=this.shot;
+        this.ball.setPosition(u*u*s.from.x+2*u*t*s.ctrl.x+t*t*s.to.x, u*u*s.from.y+2*u*t*s.ctrl.y+t*t*s.to.y);
+        this.ball.angle+=12; if(t>=1) this.resolveShot(); return;
+      }
+      this.powerT += this.powerDir*(delta/1000)*1.4;
+      if(this.powerT>=1){ this.powerT=1; this.powerDir=-1; } else if(this.powerT<=0){ this.powerT=0; this.powerDir=1; }
+      const m=this.meter; this.marker.y=m.bBot-this.powerT*(m.bBot-m.bTop);
+      const fire = Phaser.Input.Keyboard.JustDown(this.keys.space)||Phaser.Input.Keyboard.JustDown(this.keys.up)||Phaser.Input.Keyboard.JustDown(this.keys.w)||inputState.jumpEdge||this._shoot;
+      inputState.jumpEdge=false; this._shoot=false;
+      if(fire && this.shotsLeft>0 && this.ball){ this.launchShot(); }
+    }
+    launchShot(){
+      const p=this.powerT, sweet=0.82, tol=0.15, success=Math.abs(p-sweet)<tol;
+      const from={x:this.ball.x,y:this.ball.y};
+      const to = success ? {x:this.rim.x, y:this.rim.y+2}
+                         : {x:this.rim.x+(p<sweet?-48:44), y:this.rim.y+(p<sweet?28:-6)};
+      const ctrl={x:(from.x+to.x)/2, y:Math.min(from.y,to.y)-130-p*50};
+      this.shot={t:0,dur:640,from,ctrl,to,success};
+      if(this.player.armL){ this.player.armL.angle=-120; this.player.armR.angle=120; }
+      sfx.jump(); this.hoopMsg.setText("");
+    }
+    resolveShot(){
+      const s=this.shot; this.shot=null; this.shotsLeft--;
+      if(s.success){ this.made++; sfx.swish(); RUN_STATE.score+=100; this.refreshHUD();
+        this.floatText(this.rim.x,this.rim.y-14,"¡ENCESTA! 🏀","#ffce2e"); this.cameras.main.shake(90,0.005);
+        this.tweens.add({targets:this.ball,y:this.ball.y+70,alpha:0,duration:400,onComplete:()=>this.ball&&this.ball.destroy()});
+      } else { sfx.clank(); this.floatText(this.ball.x,this.ball.y-10,"¡Casi!","#ff9a9a");
+        this.tweens.add({targets:this.ball,x:this.ball.x+(s.to.x>this.rim.x?60:-60),y:this.player.y-6,alpha:0,duration:500,onComplete:()=>this.ball&&this.ball.destroy()});
+      }
+      this.ball=null; this.refreshHoopHud();
+      if(this.player.armL){ this.player.armL.angle=5; this.player.armR.angle=-5; }
+      if(this.shotsLeft<=0){ this.time.delayedCall(1000,()=>this.endHoopGame()); }
+      else { this.time.delayedCall(600,()=>{ if(this.miniGame){ this.ball=this.add.image(this.hand.x,this.hand.y,"ball").setDepth(8); this.hoopMsg.setText("Toca / Espacio para lanzar 🏀"); } }); }
+    }
+    endHoopGame(){
+      this.miniGame=false; stopMusic(); touchEl.classList.remove("show");
+      if(this._shootHandler) this.input.off("pointerdown",this._shootHandler);
+      if(RUN_STATE.score>best){ best=RUN_STATE.score; localStorage.setItem("cfam.best",String(best)); }
+      saveBestByChar(CHARS[RUN_STATE.charIdx].id, RUN_STATE.score);
+      unlockLevel(RUN_STATE.level+1);
+      $("winAllScore").textContent=`🏀 Encestaste ${this.made}/5   ·   ${RUN_STATE.score} pts   ·   Récord ${best}`;
+      showOverlay(overlays.winAll);
+    }
+
     update(time,delta){
+      if(this.miniGame){ this.updateHoop(time,delta); return; }
       if(this.dead||this.celebrating){ if(this.player.body) this.player.body.setVelocityX(0); return; }
       const S=RUN_STATE, kb=this.keys, b=this.player.body;
       const left = kb.left.isDown||kb.a.isDown||inputState.left;
