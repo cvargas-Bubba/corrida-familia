@@ -146,7 +146,7 @@
   const LEVELS = [
     // ---- 1) Río de Janeiro (largo) ----
     { w:74, spawn:[2,9], flag:[72,9], pits:[[15,16],[27,29],[41,42],[54,56],[66,67]],
-      rows:["","","","","","", rowFrom(74,[[18,"BBB"],[44,"===="]]), rowFrom(74,[[31,"===="],[58,"BBB"]]), "", rowFrom(74,[[33,"^^"],[51,"^^"]])],
+      rows:["","","","","","", rowFrom(74,[[10,"?"],[18,"BBB"],[38,"?"],[44,"===="],[64,"?"]]), rowFrom(74,[[31,"===="],[58,"BBB"]]), "", rowFrom(74,[[33,"^^"],[51,"^^"]])],
       coins:[[15,7],[16,7],[18,5],[19,5],[27,7],[28,7],[29,7],[31,6],[32,6],[33,6],[41,7],[42,7],[44,5],[45,5],[54,7],[55,7],[58,6],[59,6],[66,7],[67,7],[70,7]],
       stars:[[19,4],[45,4],[63,5]],
       enemies:[[8,9,"crab"],[21,9,"crab"],[36,9,"crab"],[49,9,"crab"],[61,9,"crab"],[70,9,"crab"]],
@@ -157,7 +157,7 @@
         enemy:0xe05a3a, boss:0xc0392b, collectible:"coin", goal:"flag", win:"¡BIEEN! 🎉" } },
     // ---- 2) Carretera Austral (largo, pozos anchos, jefe) ----
     { w:86, spawn:[2,9], flag:[84,9], pits:[[14,16],[26,27],[38,40],[50,51],[62,64],[74,75]],
-      rows:["","","","","","", rowFrom(86,[[20,"==="],[44,"BBBB"],[68,"==="]]), rowFrom(86,[[32,"BBB"],[56,"===="]]), "", rowFrom(86,[[23,"^^"],[47,"^^"],[70,"^^"]])],
+      rows:["","","","","","", rowFrom(86,[[12,"?"],[20,"==="],[36,"?"],[44,"BBBB"],[60,"?"],[68,"==="]]), rowFrom(86,[[32,"BBB"],[56,"===="]]), "", rowFrom(86,[[23,"^^"],[47,"^^"],[70,"^^"]])],
       coins:[[14,7],[15,7],[16,7],[20,5],[26,7],[27,7],[32,6],[33,6],[38,7],[39,7],[40,7],[44,5],[45,5],[50,7],[51,7],[56,6],[57,6],[62,7],[63,7],[64,7],[68,5],[74,7],[75,7]],
       stars:[[20,4],[56,4],[82,3]],
       enemies:[[9,9,"crab"],[22,9,"crab"],[34,9,"crab"],[46,9,"crab"],[58,9,"crab"],[78,9,"crab"],[82,9,"boss"]],
@@ -168,7 +168,7 @@
         enemy:0xb5651d, boss:0x8a4b12, collectible:"coin", goal:"flag", win:"¡BIEEN! 🎉" } },
     // ---- 3) Cancha VargasX3 (largo) + mini-juego de encestar ----
     { w:78, spawn:[2,9], flag:[75,9], pits:[[20,21],[34,36],[50,51],[64,65]],
-      rows:["","","","","","", rowFrom(78,[[12,"==="],[40,"BBB"],[58,"==="]]), rowFrom(78,[[26,"BBBB"],[46,"==="],[70,"BBB"]]), "", ""],
+      rows:["","","","","","", rowFrom(78,[[12,"==="],[24,"?"],[40,"BBB"],[52,"?"],[58,"==="]]), rowFrom(78,[[26,"BBBB"],[46,"==="],[70,"BBB"]]), "", ""],
       coins:[[20,7],[21,7],[34,7],[35,7],[36,7],[50,7],[51,7],[64,7],[65,7],[13,5],[27,6],[47,6],[59,5],[71,6]],
       stars:[[27,5],[59,4]],
       enemies:[[10,9,"crab"],[28,9,"crab"],[44,9,"crab"],[58,9,"crab"],[71,9,"crab"]],
@@ -342,6 +342,8 @@
         g.fillStyle(0x3a2456,1); g.fillCircle(18,18,10); g.fillStyle(0xb06bd6,1); g.fillCircle(15,15,3); g.generateTexture("urchin",36,36); g.destroy(); }
       if(!this.textures.exists("harpoon")){ const g=this.make.graphics({x:0,y:0,add:false}); g.fillStyle(0xffe08a,1); g.fillRect(0,4,18,3); g.fillStyle(0xdfe7ea,1); g.fillTriangle(16,0,26,5.5,16,11); g.generateTexture("harpoon",26,12); g.destroy(); }
       if(!this.textures.exists("bubble")){ const g=this.make.graphics({x:0,y:0,add:false}); g.fillStyle(0xffffff,0.22); g.fillCircle(6,6,5); g.lineStyle(1.5,0xcdefff,0.8); g.strokeCircle(6,6,5); g.generateTexture("bubble",12,12); g.destroy(); }
+      if(!this.textures.exists("qblock")){ const sz=40,cv=this.textures.createCanvas("qblock",sz,sz),c=cv.getContext(); c.fillStyle="#f2b90f";c.fillRect(0,0,sz,sz); c.fillStyle="#ffe07a";c.fillRect(2,2,sz-4,5); c.strokeStyle="#9c6a10";c.lineWidth=3;c.strokeRect(2,2,sz-4,sz-4); c.fillStyle="#8a5a10";[[7,7],[33,7],[7,33],[33,33]].forEach(a=>{c.beginPath();c.arc(a[0],a[1],2,0,7);c.fill();}); c.fillStyle="#7a4a08";c.font="bold 24px Arial";c.textAlign="center";c.textBaseline="middle";c.fillText("?",sz/2,sz/2+1); cv.refresh(); }
+      if(!this.textures.exists("qblock_used")){ const sz=40,cv=this.textures.createCanvas("qblock_used",sz,sz),c=cv.getContext(); c.fillStyle="#8a6a3a";c.fillRect(0,0,sz,sz); c.strokeStyle="#5e4522";c.lineWidth=3;c.strokeRect(2,2,sz-4,sz-4); c.fillStyle="#5e4522";[[7,7],[33,7],[7,33],[33,33]].forEach(a=>{c.beginPath();c.arc(a[0],a[1],2,0,7);c.fill();}); cv.refresh(); }
       // circular head textures
       CHARS.forEach(c=>{
         const key="head_"+c.id;
@@ -430,6 +432,12 @@
       // power-ups
       this.powerGroup=this.physics.add.staticGroup();
       (lv.powers||[]).forEach(([px,py,tp])=>{ const s=this.powerGroup.create(px*T+T/2,py*T+T/2,"pw_"+tp); s.ptype=tp; s.setDepth(3); });
+
+      // bloques sorpresa "?" (ocultan power-ups; se golpean desde abajo)
+      this.mysteryGroup=this.physics.add.staticGroup();
+      this.itemGroup=this.physics.add.group();
+      const qitems=["shield","magnet","djump"];
+      for(let ty=0;ty<ROWS;ty++)for(let tx=0;tx<w;tx++) if(this.grid[ty][tx]==="?"){ const bk=this.mysteryGroup.create(tx*T+T/2,ty*T+T/2,"qblock"); bk.used=false; bk.item=qitems[(tx+ty)%3]; bk.setDepth(2); bk.refreshBody(); }
     }
 
     makeCrab(x,y,boss){
@@ -498,6 +506,8 @@
       this.physics.add.overlap(this.player,this.spikeZones,()=>this.hurt());
       this.physics.add.overlap(this.player,this.flagZone,()=>this.reachFlag());
       this.physics.add.overlap(this.player,this.powerGroup,(p,pw)=>this.grabPower(pw));
+      this.physics.add.collider(this.player,this.mysteryGroup,(p,blk)=>this.hitMystery(blk));
+      this.physics.add.overlap(this.player,this.itemGroup,(p,it)=>this.grabPower(it));
       this.physics.add.collider(this.enemyGroup,this.solids);
       this.physics.add.overlap(this.player,this.enemyGroup,(p,e)=>this.hitEnemy(e));
 
@@ -534,6 +544,17 @@
       if(tp==="shield"){ this.player.shield=true; this.shieldRing.setVisible(true); this.floatText(this.player.x,this.player.y-40,"🛡️ Escudo","#8fd3ff"); }
       else if(tp==="magnet"){ this.magnetUntil=now+8000; this.floatText(this.player.x,this.player.y-40,"🧲 Imán","#ff9a9a"); }
       else if(tp==="djump"){ this.djumpUntil=now+9000; this.floatText(this.player.x,this.player.y-40,"👟 Salto doble","#9affb0"); } }
+    hitMystery(blk){
+      if(blk.used) return;
+      // solo si el jugador lo golpea desde abajo (saltando) y el bloque está encima
+      if(!(this.player.body.blocked.up && blk.y < this.player.y)) return;
+      blk.used=true; blk.setTexture("qblock_used"); sfx.power();
+      this.tweens.add({targets:blk,y:blk.y-6,yoyo:true,duration:110});
+      const it=this.itemGroup.create(blk.x, blk.y-2, "pw_"+blk.item); it.ptype=blk.item; it.setDepth(3);
+      it.body.setAllowGravity(false); it.body.setVelocityY(-70);
+      this.time.delayedCall(470,()=>{ if(it.active) it.body.setVelocityY(0); });
+      this.floatText(blk.x, blk.y-22, "¡Sorpresa!", "#ffe082");
+    }
 
     hitEnemy(e){
       if(this.celebrating||this.dead||!e.active)return;
